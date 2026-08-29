@@ -257,6 +257,7 @@ function loop(ts) {
     }
   }
   draw();
+  if (gameOver) return;
   animId = requestAnimationFrame(loop);
 }
 
@@ -310,6 +311,8 @@ function setTheme(theme) {
   gridColor = theme === 'light' ? GRID_COLORS.light : GRID_COLORS.dark;
   localStorage.setItem('theme', theme);
 }
+
+themeToggle.addEventListener('mousedown', e => e.preventDefault());
 
 themeToggle.addEventListener('click', () => {
   const theme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
