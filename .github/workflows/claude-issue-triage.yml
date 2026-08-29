@@ -48,4 +48,8 @@ jobs:
                - Un enfoque sugerido para abordar la solución, sin escribir
                  código todavía (eso se hará en un paso posterior).
 
+               El comentario debe estar redactado en formato Markdown válido
+               que GitHub pueda renderizar correctamente (encabezados, listas,
+               bloques de código con \`\`\` para nombres de archivo/función, etc.).
+
           claude_args: '--allowedTools "Read" "Glob" "Grep" "Bash(gh issue view:*)" "Bash(gh issue edit:*)" "Bash(gh issue comment:*)"'
