@@ -24,9 +24,10 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
           prompt: |
-            Analiza el issue #${{ github.event.issue.number }} de este repositorio
-            (título y descripción) y, si hace falta contexto, revisa el código
-            relevante (game.js, index.html, style.css).
+            Ejecuta `gh issue view ${{ github.event.issue.number }} --json title,body,labels`
+            para obtener el título y la descripción del issue #${{ github.event.issue.number }}
+            de este repositorio. Si hace falta contexto adicional, revisa el código
+            relevante (game.js, index.html, style.css) con Read/Glob/Grep.
 
             1. Aplica las labels que correspondan usando ÚNICAMENTE este conjunto
                cerrado de labels ya existentes en el repo (no crees labels nuevas):
@@ -47,4 +48,4 @@ jobs:
                - Un enfoque sugerido para abordar la solución, sin escribir
                  código todavía (eso se hará en un paso posterior).
 
-          claude_args: '--allowedTools "Bash(gh issue edit:*)" "Bash(gh issue comment:*)"'
+          claude_args: '--allowedTools "Read" "Glob" "Grep" "Bash(gh issue view:*)" "Bash(gh issue edit:*)" "Bash(gh issue comment:*)"'
