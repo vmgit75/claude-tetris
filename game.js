@@ -14,6 +14,7 @@ const COLORS = [
   '#90caf9', // J - pale blue
   '#ffb74d', // L - orange
   '#b0bec5', // NUT - metallic gray
+  '#ff2fd4', // POWERUP - magenta neón
 ];
 
 const PIECES = [
@@ -26,9 +27,12 @@ const PIECES = [
   [[6,0,0],[6,6,6],[0,0,0]],                  // J
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
   [[8,8,8],[8,0,8],[8,8,8]],                  // NUT - hueco central
+  [[0,9,0],[9,9,9],[0,9,0]],                  // POWERUP - cruz 3x3
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
+const POWERUP_TYPE = 9;
+const POWERUP_MIN_LINES = 3;
 
 const GRID_COLORS = { dark: '#22222e', light: '#e0e0ea' };
 let gridColor = GRID_COLORS.dark;
@@ -54,7 +58,15 @@ function createBoard() {
 
 function randomPiece() {
   const NUT_CHANCE = 0.06;
-  const type = Math.random() < NUT_CHANCE ? 8 : Math.floor(Math.random() * 7) + 1;
+  const POWERUP_CHANCE = 0.03;
+  let type;
+  if (lines >= POWERUP_MIN_LINES && Math.random() < POWERUP_CHANCE) {
+    type = POWERUP_TYPE;
+  } else if (Math.random() < NUT_CHANCE) {
+    type = 8;
+  } else {
+    type = Math.floor(Math.random() * 7) + 1;
+  }
   const shape = PIECES[type].map(row => [...row]);
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
@@ -143,9 +155,57 @@ function softDrop() {
 }
 
 function lockPiece() {
-  merge();
+  if (current.type === POWERUP_TYPE) {
+    destroyArea();
+  } else {
+    merge();
+  }
   clearLines();
   spawn();
+}
+
+function destroyArea() {
+  // la pieza misma nunca se mergea al board, así que ya queda destruida.
+  // buscamos las celdas del stack que la pieza toca al aterrizar.
+  const NEIGHBORS = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+  const contacts = [];
+  for (let r = 0; r < current.shape.length; r++) {
+    for (let c = 0; c < current.shape[r].length; c++) {
+      if (!current.shape[r][c]) continue;
+      const px = current.x + c, py = current.y + r;
+      for (const [dx, dy] of NEIGHBORS) {
+        const nx = px + dx, ny = py + dy;
+        if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && board[ny][nx]) {
+          contacts.push([nx, ny]);
+        }
+      }
+    }
+  }
+  if (!contacts.length) return;
+
+  const countAt = (cx, cy) => {
+    let count = 0;
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && board[ny][nx]) count++;
+      }
+    return count;
+  };
+
+  // elegimos el centro 3x3 que maximiza los bloques del stack destruidos
+  let best = contacts[0], bestCount = countAt(best[0], best[1]);
+  for (const [cx, cy] of contacts) {
+    const count = countAt(cx, cy);
+    if (count > bestCount) { bestCount = count; best = [cx, cy]; }
+  }
+
+  const [bx, by] = best;
+  for (let dy = -1; dy <= 1; dy++)
+    for (let dx = -1; dx <= 1; dx++) {
+      const nx = bx + dx, ny = by + dy;
+      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS) board[ny][nx] = 0;
+    }
 }
 
 function spawn() {
