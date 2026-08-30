@@ -124,6 +124,10 @@ function merge() {
         board[current.y + r][current.x + c] = current.shape[r][c];
 }
 
+function dropIntervalForLevel(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
+
 function clearLines() {
   let cleared = 0;
   for (let r = ROWS - 1; r >= 0; r--) {
@@ -138,7 +142,7 @@ function clearLines() {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    dropInterval = dropIntervalForLevel(level);
     updateHUD();
   }
 }
@@ -298,11 +302,10 @@ function drawNext() {
 }
 
 function endGame() {
+  // Note: endGame only runs from the active (unpaused) game loop, so
+  // overlayTitle/overlayScore/restartBtn are never left hidden by togglePause here.
   gameOver = true;
   cancelAnimationFrame(animId);
-  overlayTitle.style.display = '';
-  overlayScore.style.display = '';
-  restartBtn.style.display = '';
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
@@ -350,7 +353,7 @@ function init() {
   level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = Math.max(100, 1000 - (startLevel - 1) * 90);
+  dropInterval = dropIntervalForLevel(startLevel);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
