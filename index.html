@@ -13,6 +13,7 @@
       <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
         <span class="knob"></span>
       </button>
+      <button id="records-btn" class="records-btn" title="Ver récords">Ver récords</button>
     </div>
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>
@@ -54,6 +55,19 @@
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
         <button id="restart-btn">Reiniciar</button>
+
+        <div id="leaderboard-panel">
+          <p id="run-stats"></p>
+          <div id="save-score-form">
+            <input id="name-input" type="text" placeholder="Nombre" maxlength="12" autocomplete="off" />
+            <button id="save-score-btn">Guardar</button>
+          </div>
+          <ol id="leaderboard-list"></ol>
+          <div id="leaderboard-actions">
+            <button id="reset-records-btn">Borrar récords</button>
+            <button id="close-records-btn">Cerrar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
