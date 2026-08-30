@@ -38,14 +38,14 @@ const POWERUP_MIN_LINES = 3;
 
 const PASTEL_COLORS = [
   null,
-  '#b2ebf2', // I
-  '#fff3c4', // O
+  '#80deea', // I
+  '#ffe082', // O - darker than white board bg so it stays visible in light theme
   '#e1bee7', // T
   '#c8e6c9', // S
   '#ffcdd2', // Z
   '#bbdefb', // J
   '#ffe0b2', // L
-  '#eceff1', // NUT
+  '#b0bec5', // NUT - darker than white board bg so it stays visible in light theme
   '#f8bbd0', // POWERUP
   '#fce4ec', // CROSS
 ];
@@ -260,14 +260,15 @@ function roundedRectPath(context, x, y, w, h, r) {
   context.closePath();
 }
 
-function drawBlockRetro(context, x, y, colorIndex, size) {
+function drawBlockRetro(context, x, y, colorIndex, size, isGhost) {
   context.fillStyle = COLORS[colorIndex];
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+  if (isGhost) return;
   context.fillStyle = 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
 }
 
-function drawBlockNeon(context, x, y, colorIndex, size) {
+function drawBlockNeon(context, x, y, colorIndex, size, isGhost) {
   const color = COLORS[colorIndex];
   context.save();
   context.shadowColor = color;
@@ -275,25 +276,33 @@ function drawBlockNeon(context, x, y, colorIndex, size) {
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   context.restore();
+  if (isGhost) return;
   context.fillStyle = 'rgba(255,255,255,0.25)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 3);
 }
 
-function drawBlockPastel(context, x, y, colorIndex, size) {
+function drawBlockPastel(context, x, y, colorIndex, size, isGhost) {
   const color = PASTEL_COLORS[colorIndex];
   const px = x * size + 1;
   const py = y * size + 1;
   const w = size - 2;
   const h = size - 2;
+  const r = Math.max(2, size * 0.2);
   context.fillStyle = color;
-  roundedRectPath(context, px, py, w, h, Math.max(2, size * 0.2));
+  roundedRectPath(context, px, py, w, h, r);
   context.fill();
+  // outline so pastel blocks stay visible against a white/light board background
+  context.strokeStyle = 'rgba(0,0,0,0.25)';
+  context.lineWidth = 1;
+  roundedRectPath(context, px, py, w, h, r);
+  context.stroke();
+  if (isGhost) return;
   context.fillStyle = 'rgba(255,255,255,0.35)';
-  roundedRectPath(context, px, py, w, Math.max(3, h * 0.3), Math.max(2, size * 0.2));
+  roundedRectPath(context, px, py, w, Math.max(3, h * 0.3), r);
   context.fill();
 }
 
-function drawBlockPixel(context, x, y, colorIndex, size) {
+function drawBlockPixel(context, x, y, colorIndex, size, isGhost) {
   const color = COLORS[colorIndex];
   const px = x * size + 1;
   const py = y * size + 1;
@@ -301,6 +310,7 @@ function drawBlockPixel(context, x, y, colorIndex, size) {
   const h = size - 2;
   context.fillStyle = color;
   context.fillRect(px, py, w, h);
+  if (isGhost) return;
   const cols = 3;
   const cellW = w / cols;
   const cellH = h / cols;
@@ -315,18 +325,22 @@ function drawBlockPixel(context, x, y, colorIndex, size) {
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
   context.globalAlpha = alpha ?? 1;
+  // ghost pieces skip decorative highlight/texture passes: at low alpha those
+  // extra passes compound with globalAlpha and become invisible noise instead
+  // of a clean silhouette (e.g. pixel skin's full-block checker texture).
+  const isGhost = (alpha ?? 1) < 1;
   switch (currentSkin) {
     case 'neon':
-      drawBlockNeon(context, x, y, colorIndex, size);
+      drawBlockNeon(context, x, y, colorIndex, size, isGhost);
       break;
     case 'pastel':
-      drawBlockPastel(context, x, y, colorIndex, size);
+      drawBlockPastel(context, x, y, colorIndex, size, isGhost);
       break;
     case 'pixel':
-      drawBlockPixel(context, x, y, colorIndex, size);
+      drawBlockPixel(context, x, y, colorIndex, size, isGhost);
       break;
     default:
-      drawBlockRetro(context, x, y, colorIndex, size);
+      drawBlockRetro(context, x, y, colorIndex, size, isGhost);
   }
   context.globalAlpha = 1;
 }
@@ -447,6 +461,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (skinSelectorOpen) return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -493,6 +508,9 @@ const skinSelector = document.getElementById('skin-selector');
 const skinSelectorClose = document.getElementById('skin-selector-close');
 const skinOptions = document.querySelectorAll('.skin-option');
 
+let skinSelectorOpen = false;
+let autoPausedForSkin = false;
+
 function setActiveSkinOption(skin) {
   skinOptions.forEach(btn => btn.classList.toggle('active', btn.dataset.skin === skin));
 }
@@ -510,17 +528,37 @@ const savedSkin = localStorage.getItem('tetris-skin');
 currentSkin = SKINS.includes(savedSkin) ? savedSkin : 'retro';
 setActiveSkinOption(currentSkin);
 
+function openSkinSelector() {
+  skinSelector.classList.remove('hidden');
+  skinSelectorOpen = true;
+  if (!paused && !gameOver) {
+    autoPausedForSkin = true;
+    cancelAnimationFrame(animId);
+  }
+}
+
+function closeSkinSelector() {
+  skinSelector.classList.add('hidden');
+  skinSelectorOpen = false;
+  if (autoPausedForSkin) {
+    autoPausedForSkin = false;
+    lastTime = performance.now();
+    animId = requestAnimationFrame(loop);
+  }
+}
+
 if (skinToggle) {
   skinToggle.addEventListener('mousedown', e => e.preventDefault());
   skinToggle.addEventListener('click', () => {
-    skinSelector.classList.toggle('hidden');
+    // Don't let the skin panel cover the pause/game-over overlay or its buttons.
+    if (paused || gameOver) return;
+    if (skinSelectorOpen) closeSkinSelector();
+    else openSkinSelector();
   });
 }
 
 if (skinSelectorClose) {
-  skinSelectorClose.addEventListener('click', () => {
-    skinSelector.classList.add('hidden');
-  });
+  skinSelectorClose.addEventListener('click', closeSkinSelector);
 }
 
 skinOptions.forEach(btn => {
