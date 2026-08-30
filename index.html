@@ -13,6 +13,7 @@
       <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
         <span class="knob"></span>
       </button>
+      <button id="skin-toggle" class="skin-toggle" aria-label="Cambiar skin visual" title="Skins">🎨</button>
     </div>
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>
@@ -54,6 +55,31 @@
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <div id="skin-selector" class="skin-selector hidden">
+      <div class="skin-selector-box">
+        <p class="skin-selector-title">SKIN VISUAL</p>
+        <div class="skin-options">
+          <button class="skin-option" data-skin="retro">
+            <span class="skin-swatch skin-swatch-retro"></span>
+            Retro
+          </button>
+          <button class="skin-option" data-skin="neon">
+            <span class="skin-swatch skin-swatch-neon"></span>
+            Neon
+          </button>
+          <button class="skin-option" data-skin="pastel">
+            <span class="skin-swatch skin-swatch-pastel"></span>
+            Pastel
+          </button>
+          <button class="skin-option" data-skin="pixel">
+            <span class="skin-swatch skin-swatch-pixel"></span>
+            Pixel Art
+          </button>
+        </div>
+        <button id="skin-selector-close">Cerrar</button>
       </div>
     </div>
   </div>

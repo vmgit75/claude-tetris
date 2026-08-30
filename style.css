@@ -246,3 +246,126 @@ kbd {
 #restart-btn:hover {
   background: var(--btn-bg-hover);
 }
+
+/* ---- Skin selector ---- */
+.skin-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--toggle-bg);
+  border: 1px solid var(--toggle-border);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.skin-toggle:hover {
+  background: var(--btn-bg-hover);
+}
+
+.skin-selector {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.skin-selector.hidden {
+  display: none;
+}
+
+.skin-selector-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: var(--board-bg);
+  border: 1px solid var(--board-border);
+  border-radius: 8px;
+  padding: 20px 24px;
+}
+
+.skin-selector-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--fg);
+}
+
+.skin-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.skin-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  background: var(--kbd-bg);
+  border: 2px solid var(--kbd-border);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.skin-option.active {
+  border-color: var(--btn-bg);
+}
+
+.skin-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: block;
+}
+
+.skin-swatch-retro {
+  background: linear-gradient(135deg, #4dd0e1, #ffd54f, #ba68c8);
+}
+
+.skin-swatch-neon {
+  background: #050505;
+  box-shadow: 0 0 12px 2px #ff2fd4, inset 0 0 8px #4dd0e1;
+}
+
+.skin-swatch-pastel {
+  background: linear-gradient(135deg, #b2ebf2, #fff3c4, #e1bee7);
+  border-radius: 12px;
+}
+
+.skin-swatch-pixel {
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.15) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.15) 75%),
+    linear-gradient(45deg, rgba(0, 0, 0, 0.15) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.15) 75%);
+  background-size: 13px 13px;
+  background-position: 0 0, 6.5px 6.5px;
+  background-color: #ffb74d;
+}
+
+#skin-selector-close {
+  margin-top: 4px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#skin-selector-close:hover {
+  background: var(--btn-bg-hover);
+}
