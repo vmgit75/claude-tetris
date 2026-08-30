@@ -15,6 +15,7 @@ const COLORS = [
   '#ffb74d', // L - orange
   '#b0bec5', // NUT - metallic gray
   '#ff2fd4', // POWERUP - magenta neón
+  '#f8bbd0', // CROSS - rosa pálido
 ];
 
 const PIECES = [
@@ -28,6 +29,7 @@ const PIECES = [
   [[0,0,7],[7,7,7],[0,0,0]],                  // L
   [[8,8,8],[8,0,8],[8,8,8]],                  // NUT - hueco central
   [[9]],                                        // POWERUP - bloque 1x1 (destruye área 3x3)
+  [[0,10,0],[10,10,10],[0,10,0]],             // CROSS - forma de cruz
 ];
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -59,11 +61,14 @@ function createBoard() {
 function randomPiece() {
   const NUT_CHANCE = 0.06;
   const POWERUP_CHANCE = 0.03;
+  const CROSS_CHANCE = 0.06;
   let type;
   if (lines >= POWERUP_MIN_LINES && Math.random() < POWERUP_CHANCE) {
     type = POWERUP_TYPE;
   } else if (Math.random() < NUT_CHANCE) {
     type = 8;
+  } else if (Math.random() < CROSS_CHANCE) {
+    type = 10;
   } else {
     type = Math.floor(Math.random() * 7) + 1;
   }
